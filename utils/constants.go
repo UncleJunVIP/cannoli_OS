@@ -3,10 +3,12 @@ package utils
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 const (
 	systemPath      = "/System"
+	biosPath        = "/BIOS"
 	romsPath        = "/Roms"
 	cheatsPath      = "/Cheats"
 	collectionsPath = "/Collections"
@@ -16,12 +18,19 @@ const (
 	settingsPath    = "/Settings"
 )
 
+var OrderedFolderRegex = regexp.MustCompile(`\d+\)\s`)
+var TagRegex = regexp.MustCompile(`\((.*?)\)`)
+
 func GetRoot() string {
 	return os.Getenv("HOME")
 }
 
 func GetSystemPath() string {
 	return filepath.Join(GetRoot(), systemPath)
+}
+
+func GetBiosPath() string {
+	return filepath.Join(GetRoot(), biosPath)
 }
 
 func GetRomPath() string {

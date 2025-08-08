@@ -1,0 +1,12 @@
+/*.iml
+/.idea/
+
+.DS_Store
+**/.DS_Store
+
+/*.log
+
+/build/*
+/certs/*
+/data/*
+/.env
