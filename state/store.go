@@ -12,7 +12,10 @@ var onceAppState sync.Once
 func Get() *models.AppState {
 	onceAppState.Do(func() {
 		appState.Store(&models.AppState{
-			HideEmpty: true,
+			Config: models.Config{
+				ShowArt:              false,
+				HideEmptyDirectories: true,
+			},
 		})
 	})
 	return appState.Load()

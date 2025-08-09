@@ -6,6 +6,7 @@ tasks:
       - task: cleanup
       - task: build
       - task: package
+      - task: adb
     silent: true
 
   build:
@@ -33,4 +34,10 @@ tasks:
   cleanup:
     cmds:
       - docker rm extract || true
+    silent: true
+
+  adb:
+    cmds:
+      - adb push build/cannoliOS /mnt/SDCARD/System
+      - say Finished deploying Cannoli OS!
     silent: true

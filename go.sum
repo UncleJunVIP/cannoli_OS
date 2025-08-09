@@ -8,6 +8,8 @@ github.com/UncleJunVIP/gabagool v0.0.64 h1:tscspTXGo86dmtWU+/OKBJdtjgVJwijAFbFQf
 github.com/UncleJunVIP/gabagool v0.0.64/go.mod h1:m9myn3onXF9duenLShS+lDJ+EZDvimZQpUVea5W9TQ4=
 github.com/UncleJunVIP/gabagool v0.0.65 h1:8kFHT3Ob6pnM8RlafrZ9J02xmfmw370oCw/GNUKu6Mc=
 github.com/UncleJunVIP/gabagool v0.0.65/go.mod h1:m9myn3onXF9duenLShS+lDJ+EZDvimZQpUVea5W9TQ4=
+github.com/UncleJunVIP/gabagool v0.0.66 h1:WqohxMb1YJdvrfwv4BgHAoO9HrR77Qn72Hew8Q+ypLA=
+github.com/UncleJunVIP/gabagool v0.0.66/go.mod h1:m9myn3onXF9duenLShS+lDJ+EZDvimZQpUVea5W9TQ4=
 github.com/craterdog/go-collection-framework/v7 v7.4.0 h1:sU+WAjw9WlSoGFCd3GgtVaHg+kJcMAfWnkeTPOdC78E=
 github.com/craterdog/go-collection-framework/v7 v7.4.0/go.mod h1:SEAnvw+YEEGhchxDsO9MgOj8K7pycfBPM2t8dDdN/jo=
 github.com/craterdog/go-missing-utilities/v7 v7.5.0 h1:Bymc0kgrzt10itgqzLP2hJCO8jFIeG7e65O0lqA4RJE=

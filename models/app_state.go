@@ -5,6 +5,6 @@ import (
 )
 
 type AppState struct {
-	HideEmpty   bool
+	Config      Config
 	ScreenStack gcf.StackLike[string]
 }

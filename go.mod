@@ -5,7 +5,7 @@ go 1.24
 require github.com/UncleJunVIP/certifiable v1.0.0
 
 require (
-	github.com/UncleJunVIP/gabagool v0.0.65
+	github.com/UncleJunVIP/gabagool v0.0.66
 	github.com/craterdog/go-collection-framework/v7 v7.4.0
 	go.uber.org/atomic v1.11.0
 )

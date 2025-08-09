@@ -4,7 +4,7 @@ type ScreenName string
 
 const (
 	MainMenu  ScreenName = "MainMenu"
-	GamesList ScreenName = "GameList"
+	GameList  ScreenName = "GameList"
 	ToolsList ScreenName = "ToolsList"
 	Settings  ScreenName = "Settings"
 )
