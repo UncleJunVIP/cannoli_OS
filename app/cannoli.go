@@ -29,12 +29,18 @@ func main() {
 
 		switch currentScreen.Name() {
 		case models.MainMenu:
-			directory := sr.Output.(models.Directory)
 
-			currentScreen = ui.GameList{
-				Directory:      directory,
-				SearchFilter:   "",
-				DirectoryStack: module.Stack[models.Directory](),
+			switch sr.Code {
+			case models.Select:
+				directory := sr.Output.(models.Directory)
+
+				currentScreen = ui.GameList{
+					Directory:      directory,
+					SearchFilter:   "",
+					DirectoryStack: module.Stack[models.Directory](),
+				}
+			case models.Action:
+
 			}
 
 		case models.GameList:

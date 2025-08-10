@@ -10,3 +10,5 @@
 /certs/*
 /data/*
 /.env
+/containers/RetroArch/RetroArch/
+/containers/RetroArch/retroarch-aarch64-tinalinux-portable.tar.gz

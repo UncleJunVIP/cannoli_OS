@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+
+  all:
+    cmds:
+      - task: clean
+      - task: build
+      - task: extract
+    silent: true
+
+  build:
+    docker build -t retroarch-aarch64-portable .
+
+  extract:
+    cmds:
+      - docker rm -f ra-extract || true
+      - docker create --name ra-extract retroarch-aarch64-portable
+      - docker cp ra-extract:/out/retroarch-aarch64-tinalinux-portable.tar.gz .
+      - tar -xvzf retroarch-aarch64-tinalinux-portable.tar.gz
+      - mv ./appdir ./RetroArch
+
+  clean:
+    cmds:
+      - rm -rf appdir || true
+      - rm -rf RetroArch || true
+      - rm *.tar.gz || true
+      - docker rm -f ra-extract || true
+
+  adb:
+     cmds:
+       - adb shell rm -rf /mnt/SDCARD/RetroArch
+       - adb push ./RetroArch /mnt/SDCARD
