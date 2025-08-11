@@ -24,9 +24,9 @@ RUN dpkg --add-architecture arm64 && apt-get update && apt-get install -y --no-i
     libasound2:arm64 libasound2-dev:arm64 \
     # Input (udev/evdev)
     libudev1:arm64 libudev-dev:arm64 libevdev2:arm64 libevdev-dev:arm64 \
-    # SDL2 (video/input/audio)
+    # SDL2 (headers/libs for building RetroArch; runtime SDL will be our custom build)
     libsdl2-2.0-0:arm64 libsdl2-dev:arm64 \
-    # X11 bits to allow OpenGL via GLX (helps ensure OpenGL driver shows up)
+    # X11 bits (left available but RetroArch built with --disable-x11)
     libx11-6:arm64 libx11-dev:arm64 libxext6:arm64 libxext-dev:arm64 \
     libxrandr2:arm64 libxrandr-dev:arm64 libxi6:arm64 libxi-dev:arm64 libxinerama1:arm64 libxinerama-dev:arm64 \
     # GL/EGL/GLES
@@ -146,7 +146,7 @@ RUN set -eux; \
   git clone --depth=1 "$ASSETS_REPO" retroarch-assets; \
   git clone --depth=1 "$AUTOCONF_REPO" retroarch-joypad-autoconfig
 
-# Assemble the portable appdir
+# Assemble the portable appdir layout and copy RetroArch + assets + cores
 RUN set -eux; \
   mkdir -p "$APPDIR"/{lib,usr/lib,cores,assets,autoconfig,system,shaders,records,playlists,downloads}; \
   cp /src/RetroArch/retroarch "$APPDIR/"; \
@@ -154,24 +154,35 @@ RUN set -eux; \
   cp -r /src/retroarch-assets/* "$APPDIR/assets/"; \
   cp -r /src/retroarch-joypad-autoconfig/* "$APPDIR/autoconfig/"; \
   cp /src/cores-built/*.so "$APPDIR/cores/" || true; \
-  # Wrap the ELF so launching 'retroarch' uses our bundled loader/libs
-  mv "$APPDIR/retroarch" "$APPDIR/retroarch.bin"; \
-  cat > "$APPDIR/retroarch" <<'SH'
-#!/bin/sh
-SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-unset LD_PRELOAD LD_AUDIT
-export LD_LIBRARY_PATH="$SELF_DIR/lib:$SELF_DIR/usr/lib"
-exec "$SELF_DIR/lib/ld-linux-aarch64.so.1" \
-  --library-path "$LD_LIBRARY_PATH" \
-  "$SELF_DIR/retroarch.bin" "$@"
-SH
-RUN chmod +x "$APPDIR/retroarch"
+  # Prepare to wrap the ELF later
+  mv "$APPDIR/retroarch" "$APPDIR/retroarch.bin"
+
+# Build SDL2 for aarch64 with fbcon + kmsdrm (PulseAudio disabled) and bundle it
+RUN set -eux; \
+  SDL_VER=2.30.7; \
+  cd /src; \
+  curl -L -o SDL2.tar.gz "https://github.com/libsdl-org/SDL/releases/download/release-$SDL_VER/SDL2-$SDL_VER.tar.gz"; \
+  tar -xzf SDL2.tar.gz; \
+  cd "SDL2-$SDL_VER"; \
+  PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig \
+  ./configure --host="$TARGET" --prefix=/opt/sdl2-aarch64 \
+    --disable-rpath \
+    --enable-video-kmsdrm \
+    --enable-video-fbcon \
+    --disable-video-wayland \
+    --disable-video-x11 \
+    --disable-pulseaudio \
+    --enable-alsa; \
+  make -j"$(nproc)" CC="$TARGET-gcc"; \
+  make install; \
+  # Bundle our SDL2 runtime (prefer it over distro one)
+  cp -Lf /opt/sdl2-aarch64/lib/libSDL2-2.0.so.0 "$APPDIR/lib/"
 
 # Trim bulky asset dirs
 RUN set -eux; \
-    rm -rf "$APPDIR/assets/wallpapers" || true; \
-    rm -rf "$APPDIR/assets/xmb" || true; \
-    rm -rf "$APPDIR/assets/src" || true;
+  rm -rf "$APPDIR/assets/wallpapers" || true; \
+  rm -rf "$APPDIR/assets/xmb" || true; \
+  rm -rf "$APPDIR/assets/src" || true
 
 # Bundle dynamic linker and essential runtime libs + some common deps
 RUN set -eux; \
@@ -193,8 +204,9 @@ RUN set -eux; \
   cp "$($TARGET-g++ -print-file-name=libstdc++.so.6)" "$APP_LIB/"; \
   cp "$($TARGET-gcc -print-file-name=libgcc_s.so.1)" "$APP_LIB/"; \
   # Seed likely runtime libs (the rest are auto-copied below)
+  # NOTE: we intentionally do NOT seed libSDL2-2.0.so.0 here, as we bundled our custom SDL2 above.
   for L in \
-    libasound.so.2 libudev.so.1 libSDL2-2.0.so.0 \
+    libasound.so.2 libudev.so.1 \
     libEGL.so.1 libGLESv2.so.2 libGL.so.1 \
     libvulkan.so.1 libgbm.so.1 libdrm.so.2 \
     libz.so.1 libpng16.so.16 libjpeg.so.62 libfreetype.so.6 \
@@ -204,7 +216,7 @@ RUN set -eux; \
       if [ -e "$d/$L" ]; then cp -Lf "$d/$L" "$APP_LIB/" && break; fi; \
     done; \
   done; \
-  # PulseAudio bits: SDL2 on Debian links to libpulse, which at runtime dlopens libpulsecommon-*.so
+  # PulseAudio bits (in case any path ends up requiring libpulse at runtime)
   for d in /lib/aarch64-linux-gnu /usr/lib/aarch64-linux-gnu; do \
     [ -e "$APP_LIB/libpulse.so.0" ] || { [ -e "$d/libpulse.so.0" ] && cp -Lf "$d/libpulse.so.0" "$APP_LIB/"; }; \
     [ -e "$APP_LIB/libpulse-simple.so.0" ] || { [ -e "$d/libpulse-simple.so.0" ] && cp -Lf "$d/libpulse-simple.so.0" "$APP_LIB/"; }; \
@@ -265,15 +277,15 @@ RUN set -eux; \
     [ -e "$APP_LIB/$n" ] || { echo "ERROR: unresolved dependency for retroarch.bin: $n"; missing=1; }; \
   done; \
   [ "$missing" -eq 0 ] || { ls -lah "$APP_LIB" || true; exit 1; }; \
-  # Skip ldd on cross (aarch64 target)
   echo "Dependency copy and verification completed."
 
-# Default config to use SDL2 video/input and ALSA audio
+# Default config to use SDL2 video/input and ALSA audio, and disable threaded video
 RUN set -eux; \
   cat > "$APPDIR/retroarch.cfg" <<'CFG'
 menu_driver = "ozone"
 
 video_driver = "sdl2"
+video_threaded = "false"
 audio_driver = "alsa"
 input_driver = "udev"
 
@@ -289,7 +301,6 @@ shader_directory = "shaders"
 system_directory = "system"
 
 video_fullscreen = "true"
-video_threaded = "true"
 
 input_enable_hotkey = "escape"
 input_exit_emulator = "q"
@@ -297,17 +308,89 @@ input_exit_emulator = "q"
 udev_enable = "true"
 CFG
 
-# Launcher using bundled dynamic linker
+# Wrapper launcher using bundled dynamic linker and robust environment setup
+RUN set -eux; \
+  cat > "$APPDIR/retroarch" <<'SH'
+#!/bin/sh
+SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+unset LD_PRELOAD LD_AUDIT
+
+# Ensure XDG_RUNTIME_DIR is valid
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+  UID_DIR="/run/user/$(id -u)"
+  if [ -d "$UID_DIR" ]; then
+    export XDG_RUNTIME_DIR="$UID_DIR"
+  else
+    export XDG_RUNTIME_DIR="$SELF_DIR/.xdg-runtime"
+    mkdir -p "$XDG_RUNTIME_DIR"
+    chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
+  fi
+fi
+
+# Choose SDL video driver:
+# If a desktop is present, let SDL decide (x11/wayland).
+# Otherwise prefer fbcon if /dev/fb0 exists; else kmsdrm if /dev/dri exists; else dummy.
+if [ -z "${SDL_VIDEODRIVER:-}" ]; then
+  if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+    : # desktop present
+  elif [ -e /dev/fb0 ]; then
+    export SDL_VIDEODRIVER=fbcon
+    export SDL_FBDEV=/dev/fb0
+  elif ls /dev/dri/card* >/dev/null 2>&1; then
+    export SDL_VIDEODRIVER=kmsdrm
+  else
+    export SDL_VIDEODRIVER=dummy
+  fi
+fi
+
+# Prefer ALSA to avoid Pulse issues
+export SDL_AUDIODRIVER="${SDL_AUDIODRIVER:-alsa}"
+
+export LD_LIBRARY_PATH="$SELF_DIR/lib:$SELF_DIR/usr/lib"
+exec "$SELF_DIR/lib/ld-linux-aarch64.so.1" \
+  --library-path "$LD_LIBRARY_PATH" \
+  "$SELF_DIR/retroarch.bin" --video-threaded=false "$@"
+SH
+RUN chmod +x "$APPDIR/retroarch"
+
+# Also provide a run.sh with the same behavior (optional convenience)
 RUN set -eux; \
   cat > "$APPDIR/run.sh" <<'SH'
 #!/bin/sh
 SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 unset LD_PRELOAD LD_AUDIT
+
+# Ensure XDG_RUNTIME_DIR is valid
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+  UID_DIR="/run/user/$(id -u)"
+  if [ -d "$UID_DIR" ]; then
+    export XDG_RUNTIME_DIR="$UID_DIR"
+  else
+    export XDG_RUNTIME_DIR="$SELF_DIR/.xdg-runtime"
+    mkdir -p "$XDG_RUNTIME_DIR"
+    chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
+  fi
+fi
+
+# Choose SDL video driver with the same logic
+if [ -z "${SDL_VIDEODRIVER:-}" ]; then
+  if [ -n "${DISPLAY:-}" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+    : # desktop present
+  elif [ -e /dev/fb0 ]; then
+    export SDL_VIDEODRIVER=fbcon
+    export SDL_FBDEV=/dev/fb0
+  elif ls /dev/dri/card* >/dev/null 2>&1; then
+    export SDL_VIDEODRIVER=kmsdrm
+  else
+    export SDL_VIDEODRIVER=dummy
+  fi
+fi
+
+export SDL_AUDIODRIVER="${SDL_AUDIODRIVER:-alsa}"
 export LD_LIBRARY_PATH="$SELF_DIR/lib:$SELF_DIR/usr/lib"
-export SDL_AUDIODRIVER=alsa
 exec "$SELF_DIR/lib/ld-linux-aarch64.so.1" \
   --library-path "$LD_LIBRARY_PATH" \
-  "$SELF_DIR/retroarch.bin" "$@"
+  "$SELF_DIR/retroarch.bin" --video-threaded=false "$@"
 SH
 RUN chmod +x "$APPDIR/run.sh"
 
