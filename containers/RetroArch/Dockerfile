@@ -33,17 +33,27 @@ RUN  ./configure \
 RUN make clean
 RUN make -j$(nproc)
 
+RUN mkdir -p /home/builder/out
+RUN mkdir -p /home/builder/out/cores
+RUN mkdir -p /home/builder/out/cores/info
+RUN mkdir -p /home/builder/out/lib
+
+RUN cp /home/builder/RetroArch/retroarch /home/builder/out
+
 WORKDIR /home/builder
 
+# Grab Core Info
+RUN git clone https://github.com/libretro/libretro-core-info.git
+RUN cp libretro-core-info/*.info /home/builder/out/cores/info
+
+# Build Gambatte
 RUN git clone https://github.com/libretro/gambatte-libretro.git
 
 WORKDIR /home/builder/gambatte-libretro
 
 RUN make -f Makefile.libretro -j$(nproc)
+RUN cp /home/builder/gambatte-libretro/gambatte_libretro.so /home/builder/out/cores
 
-RUN git clone https://github.com/libretro/libretro-core-info.git
-
-RUN mkdir -p /home/builder/RetroArch/info
-RUN cp libretro-core-info/gambatte_libretro.info /home/builder/RetroArch/info/
+RUN cp /usr/lib/*/libxkbcommon.so.0 /home/builder/out/lib/
 
 ENTRYPOINT ["bash"]

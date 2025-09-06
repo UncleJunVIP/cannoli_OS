@@ -84,6 +84,11 @@ func main() {
 				directory := sr.Output.(models.Directory)
 				logger.Printf("Selected directory: %s (path: %s)", directory.DisplayName, directory.Path)
 
+				if directory.DisplayName == "RetroArch" {
+					launchRA()
+					continue
+				}
+
 				currentScreen = ui.GameList{
 					Directory:      directory,
 					SearchFilter:   "",
@@ -140,7 +145,7 @@ func main() {
 					selectedItem := selectedItems[0]
 					romPath := selectedItem.Path
 
-					runRA(romPath)
+					launchROM(romPath)
 				}
 
 				logger.Println("Returning to MainMenu after game launch")
@@ -158,12 +163,8 @@ func main() {
 	}
 }
 
-func runRA(romPath string) {
-	logger.Printf("Starting RetroArch execution with ROM: %s", romPath)
-
-	var cmd *exec.Cmd
-
-	cmd = exec.Command("./retroarch", "-L", "/mnt/SDCARD/RetroArch/.retroarch/cores/gambatte_libretro.so", romPath, "-c", "retroarch.cfg")
+func launchRA() {
+	cmd := exec.Command("./retroarch", "--menu", "-c", "retroarch.cfg")
 
 	cmd.Dir = "/mnt/SDCARD/RetroArch"
 
@@ -220,4 +221,64 @@ func runRA(romPath string) {
 	logger.Println("Sleeping for 1750ms before returning to menu")
 	time.Sleep(1750 * time.Millisecond)
 	logger.Println("Sleep completed, returning to application")
+}
+
+func launchROM(romPath string) {
+	logger.Printf("Starting RetroArch execution with ROM: %s", romPath)
+
+	var cmd *exec.Cmd
+
+	cmd = exec.Command("./retroarch", "-L", "/mnt/SDCARD/RetroArch/cores/gambatte_libretro.so", romPath, "-c", "retroarch.cfg")
+
+	cmd.Dir = "/mnt/SDCARD/RetroArch"
+
+	logger.Printf("Executing command: %s %v in directory: %s", cmd.Path, cmd.Args, cmd.Dir)
+
+	cmd.Env = append(os.Environ(),
+		"LD_LIBRARY_PATH=/mnt/SDCARD/RetroArch/lib:/usr/trimui/lib:"+os.Getenv("LD_LIBRARY_PATH"),
+		"PATH=/usr/trimui/bin:"+os.Getenv("PATH"),
+	)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	start := time.Now()
+	err := cmd.Run()
+	duration := time.Since(start)
+
+	stdoutStr := stdout.String()
+	stderrStr := stderr.String()
+
+	if stdoutStr != "" {
+		logger.Printf("Command stdout: %s", stdoutStr)
+	}
+	if stderrStr != "" {
+		logger.Printf("Command stderr: %s", stderrStr)
+	}
+
+	if err != nil {
+		logger.Printf("RetroArch execution failed after %v: %v", duration, err)
+		fmt.Println(err.Error())
+
+		if stdoutStr != "" {
+			fmt.Printf("stdout: %s\n", stdoutStr)
+		}
+		if stderrStr != "" {
+			fmt.Printf("stderr: %s\n", stderrStr)
+		}
+
+		var exitError *exec.ExitError
+		if errors.As(err, &exitError) {
+			logger.Printf("Process exited with code %d", exitError.ExitCode())
+			fmt.Printf("Process exited with code %d\n", exitError.ExitCode())
+		}
+	} else {
+		logger.Printf("RetroArch completed successfully after %v", duration)
+		fmt.Println("Executable completed successfully")
+
+		if stdoutStr != "" {
+			fmt.Printf("stdout: %s\n", stdoutStr)
+		}
+	}
 }

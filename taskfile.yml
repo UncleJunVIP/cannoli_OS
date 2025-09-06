@@ -39,5 +39,6 @@ tasks:
   adb:
     cmds:
       - adb push build/cannoliOS /mnt/SDCARD/System
+      - adb shell killall cannoliOS
       - say Finished deploying Cannoli OS!
     silent: true

@@ -1,27 +1,24 @@
 #!/bin/bash
+
 set -e
 
 echo "Building RetroArch Docker image..."
 docker build -t retroarch-builder .
 
-mkdir -p output
+echo "Creating temporary container..."
+CONTAINER_ID=$(docker create retroarch-builder)
 
-echo "Running RetroArch build container..."
-docker run --rm -v "$(pwd)/output:/home/builder/output" retroarch-builder
+rm -rf ./build/RetroArch || true
+mkdir -p ./build/RetroArch
 
-echo "Build completed! Checking output directory..."
-if [ -f "./output/retroarch" ]; then
-    echo "✅ RetroArch binary found!"
-    echo "📊 Binary info:"
-    file ./output/retroarch
-    echo "📏 Binary size:"
-    ls -lh ./output/retroarch
-    echo ""
-    echo "📋 All output files:"
-    ls -la ./output/
-else
-    echo "❌ RetroArch binary not found in output directory"
-    echo "Contents of output directory:"
-    ls -la ./output/ || echo "Output directory is empty"
-    exit 1
-fi
+echo "Copying files from container..."
+docker cp $CONTAINER_ID:/home/builder/out/. ./build/RetroArch/
+
+echo "Cleaning up container..."
+docker rm $CONTAINER_ID
+
+echo "Build completed! Files copied to ./build/RetroArch"
+ls -la ./build/RetroArch
+
+cp retroarch.cfg ./build/RetroArch
+cp launch.sh ./build/RetroArch

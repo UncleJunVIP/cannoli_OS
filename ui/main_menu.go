@@ -4,6 +4,7 @@ import (
 	"cannoliOS/models"
 	"cannoliOS/state"
 	"cannoliOS/utils"
+
 	gaba "github.com/UncleJunVIP/gabagool/pkg/gabagool"
 )
 
@@ -25,6 +26,11 @@ func (m MainMenu) Draw() (models.ScreenReturn, error) {
 	}
 
 	menuItems = append(menuItems, gameMenuItems...)
+
+	menuItems = append(menuItems, gaba.MenuItem{
+		Text:     "RetroArch",
+		Metadata: models.Directory{DisplayName: "RetroArch"},
+	})
 
 	options := gaba.DefaultListOptions("cannoli_OS", menuItems)
 
