@@ -35,7 +35,6 @@ const (
 )
 
 var wg sync.WaitGroup
-var showMenu = false
 
 func main() {
 	initLogging()
@@ -128,13 +127,17 @@ func toggleMenu() {
 		pauseRetroArch(retroArchPID)
 	}
 
+	time.Sleep(500 * time.Millisecond)
+
 	gaba.ShowWindow()
-	igmLoop(utils.GetRomPath())
-	gaba.HideWindow()
+	igm(utils.GetRomPath())
 
 	if retroArchPID > 0 {
 		resumeRetroArch(retroArchPID)
 	}
+
+	time.Sleep(300 * time.Millisecond)
+	gaba.HideWindow()
 
 	sendRetroArchCommand("MUTE", "192.168.1.102", "55355")
 }
@@ -195,7 +198,7 @@ func resumeRetroArch(pid int) {
 	utils.Logger.Printf("Resumed RetroArch process %d", pid)
 }
 
-func igmLoop(romPath string) OverlayResponse {
+func igm(romPath string) {
 	utils.Logger.Printf("Showing in-game menu for ROM: %s", romPath)
 
 	currentScreen := ui.InGameMenu{
@@ -208,18 +211,10 @@ func igmLoop(romPath string) OverlayResponse {
 		sr, err := currentScreen.Draw()
 		if err != nil {
 			utils.Logger.Printf("Error drawing in-game menu: %v", err)
-			return OverlayResponse{
-				Success: false,
-				Error:   err.Error(),
-			}
 		}
 
 		switch sr.Code {
 		case models.Back, models.Canceled:
-			return OverlayResponse{
-				Success: true,
-				Action:  "resume",
-			}
 
 		case models.Select:
 			action := sr.Output.(string)
@@ -227,55 +222,35 @@ func igmLoop(romPath string) OverlayResponse {
 
 			switch action {
 			case "resume":
-				showMenu = false
-				return OverlayResponse{
-					Success: true,
-					Action:  "resume",
-				}
+				return
 
 			case "save_state":
 				err := sendRetroArchCommand("SAVE_STATE", "192.168.1.102", "55355")
 				if err != nil {
 					utils.ShowMessage("Failed to save state", 3000)
 				} else {
-					utils.ShowMessage("State saved", 2000)
+					utils.ShowMessage("Saved!", 3000)
 				}
-				return OverlayResponse{
-					Success: true,
-					Action:  "save_state",
-				}
+				return
 
 			case "load_state":
-				err := sendRetroArchCommand("LOAD_STATE", "192.168.1.102", "55355")
-				if err != nil {
-					utils.ShowMessage("Failed to load state", 3000)
-				} else {
-					utils.ShowMessage("State loaded", 2000)
-				}
-				return OverlayResponse{
-					Success: true,
-					Action:  "load_state",
-				}
+				sendRetroArchCommand("LOAD_STATE", "192.168.1.102", "55355")
+				return
 
 			case "reset":
-				err := sendRetroArchCommand("RESET", "192.168.1.102", "55355")
-				if err != nil {
-					utils.ShowMessage("Failed to reset game", 3000)
-				} else {
-					utils.ShowMessage("Game reset", 2000)
-				}
-				return OverlayResponse{
-					Success: true,
-					Action:  "reset",
-				}
+				sendRetroArchCommand("RESET", "192.168.1.102", "55355")
+				return
+
+			case "settings":
+				retroArchPID := getRetroArchPID()
+				resumeRetroArch(retroArchPID)
+				time.Sleep(250 * time.Millisecond)
+				sendRetroArchCommand("MENU_TOGGLE", "192.168.1.102", "55355")
+				return
 
 			case "quit":
 				sendRetroArchCommand("QUIT", "192.168.1.102", "55355")
-				return OverlayResponse{
-					Success: true,
-					Action:  "quit",
-				}
-
+				return
 			default:
 				utils.Logger.Printf("Unhandled menu action: %s", action)
 				continue

@@ -43,7 +43,7 @@ func (igm InGameMenu) Draw() (models.ScreenReturn, error) {
 			Metadata: "reset",
 		},
 		{
-			Text:     "Game Settings",
+			Text:     "Settings",
 			Selected: false,
 			Focused:  false,
 			Metadata: "settings",

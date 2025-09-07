@@ -115,7 +115,9 @@ func main() {
 					selectedItem := selectedItems[0]
 					romPath := selectedItem.Path
 
+					gaba.HideWindow()
 					launchROM(romPath)
+					gaba.ShowWindow()
 				}
 
 				logger.Println("Returning to MainMenu after game launch")
@@ -123,6 +125,7 @@ func main() {
 					Data:     nil,
 					Position: models.Position{},
 				}
+				time.Sleep(1250 * time.Millisecond)
 			} else {
 
 				logger.Printf("Unhandled code in GameList: %v", sr.Code)
@@ -147,7 +150,6 @@ func launchROM(romPath string) {
 	logger := utils.Logger
 	logger.Printf("ROM path: %s", romPath)
 
-	// Start the overlay application in the background
 	overlayClient := utils.GetOverlayClient()
 	err := overlayClient.Start()
 	if err != nil {
@@ -156,7 +158,6 @@ func launchROM(romPath string) {
 		logger.Println("IGM overlay started successfully")
 	}
 
-	// Start RetroArch with process tracking
 	process := utils.ExecuteRetroArchWithTracking([]string{
 		"-L", "/mnt/SDCARD/RetroArch/cores/gambatte_libretro.so",
 		romPath,
@@ -164,34 +165,16 @@ func launchROM(romPath string) {
 	}, "RetroArch with ROM")
 
 	if process != nil {
-		// Start hotkey monitoring in background
 		monitor := utils.NewHotkeyMonitor()
 		monitor.Start(romPath, overlayClient)
 
-		// Wait for RetroArch to exit - this blocks until the process ends
 		process.Wait()
 
-		// Clean up after RetroArch exits
 		monitor.Stop()
 		logger.Println("RetroArch exited, stopping overlay and monitor")
 	}
 
-	// Stop overlay
 	overlayClient.Stop()
 
 	logger.Println("Game session ended, returning to main menu")
-}
-
-func startHotkeyMonitoring(romPath string, overlayClient *utils.OverlayClient) {
-	monitor := utils.NewHotkeyMonitor()
-	monitor.Start(romPath, overlayClient)
-
-	// Wait for RetroArch to exit or be killed
-	for {
-		if !utils.IsRetroArchRunning() {
-			monitor.Stop()
-			break
-		}
-		time.Sleep(1 * time.Second)
-	}
 }
