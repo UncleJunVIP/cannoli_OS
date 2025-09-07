@@ -116,7 +116,7 @@ func main() {
 					romPath := selectedItem.Path
 
 					gaba.HideWindow()
-					launchROM(romPath)
+					launchROM(selectedItem.DisplayName, romPath)
 					gaba.ShowWindow()
 				}
 
@@ -139,18 +139,18 @@ func main() {
 
 func launchRA() {
 	logger := utils.Logger
-	utils.ExecuteRetroArch([]string{"--menu", "-c", "retroarch.cfg"}, "RetroArch menu")
+	utils.ExecuteRetroArchWithTracking([]string{"--menu", "-c", "retroarch.cfg"}, "RetroArch menu")
 
 	logger.Println("Sleeping for 2500ms before returning to menu")
 	time.Sleep(2500 * time.Millisecond)
 	logger.Println("Sleep completed, returning to application")
 }
 
-func launchROM(romPath string) {
+func launchROM(name string, romPath string) {
 	logger := utils.Logger
 	logger.Printf("ROM path: %s", romPath)
 
-	overlayClient := utils.GetOverlayClient()
+	overlayClient := utils.NewOverlayClient(name)
 	err := overlayClient.Start()
 	if err != nil {
 		logger.Printf("Failed to start overlay: %v", err)
@@ -159,14 +159,14 @@ func launchROM(romPath string) {
 	}
 
 	process := utils.ExecuteRetroArchWithTracking([]string{
-		"-L", "/mnt/SDCARD/RetroArch/cores/gambatte_libretro.so",
+		"-L", "/mnt/SDCARD/System/RetroArch/cores/gambatte_libretro.so",
 		romPath,
 		"-c", "retroarch.cfg",
 	}, "RetroArch with ROM")
 
 	if process != nil {
 		monitor := utils.NewHotkeyMonitor()
-		monitor.Start(romPath, overlayClient)
+		monitor.Start(overlayClient)
 
 		process.Wait()
 

@@ -4,10 +4,11 @@ import (
 	"cannoliOS/models"
 	"cannoliOS/state"
 	"cannoliOS/utils"
-	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
-	module "github.com/craterdog/go-collection-framework/v7"
 	"path/filepath"
 	"strings"
+
+	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
+	module "github.com/craterdog/go-collection-framework/v7"
 )
 
 type GameList struct {
@@ -21,8 +22,12 @@ func (gl GameList) Name() models.ScreenName {
 }
 
 func (gl GameList) Draw() (models.ScreenReturn, error) {
-
 	title := gl.Directory.DisplayName
+
+	tagless, _ := utils.ItemNameCleaner(gl.Directory.DisplayName, true)
+	if tagless != "" {
+		title = tagless
+	}
 
 	fb := utils.NewFileBrowser()
 
@@ -79,14 +84,14 @@ func (gl GameList) Draw() (models.ScreenReturn, error) {
 	//options.SelectedIndex = selectedIndex
 	//options.VisibleStartIndex = visibleStartIndex
 
-	options.SmallTitle = true
+	options.SmallTitle = false
 	options.EmptyMessage = "No ROMs Found"
 	options.EnableAction = true
 	options.EnableMultiSelect = true
 	options.FooterHelpItems = []gabagool.FooterHelpItem{
-		{ButtonName: "B", HelpText: "Back"},
-		{ButtonName: "X", HelpText: "Search"},
-		{ButtonName: "Menu", HelpText: "Help"},
+		{ButtonName: "B", HelpText: utils.GetString("back")},
+		{ButtonName: "X", HelpText: utils.GetString("search")},
+		{ButtonName: "Menu", HelpText: "REPLACE ME"},
 	}
 
 	appState := state.Get()

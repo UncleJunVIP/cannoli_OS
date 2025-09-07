@@ -13,6 +13,7 @@ import (
 type OverlayClient struct {
 	overlayProcess *os.Process
 	isRunning      bool
+	GameName       string
 }
 
 type OverlayCommand struct {
@@ -28,19 +29,11 @@ type OverlayResponse struct {
 	Error   string `json:"error,omitempty"`
 }
 
-var overlayClient *OverlayClient
-
-func NewOverlayClient() *OverlayClient {
+func NewOverlayClient(game string) *OverlayClient {
 	return &OverlayClient{
 		isRunning: false,
+		GameName:  game,
 	}
-}
-
-func GetOverlayClient() *OverlayClient {
-	if overlayClient == nil {
-		overlayClient = NewOverlayClient()
-	}
-	return overlayClient
 }
 
 func (oc *OverlayClient) Start() error {
@@ -50,8 +43,8 @@ func (oc *OverlayClient) Start() error {
 
 	Logger.Println("Starting overlay application...")
 
-	cmd := exec.Command("./igm")
-	cmd.Dir = "/mnt/SDCARD/System" // Adjust path as needed
+	cmd := exec.Command("./igm", oc.GameName)
+	cmd.Dir = "/mnt/SDCARD/System"
 
 	err := cmd.Start()
 	if err != nil {
@@ -96,10 +89,9 @@ func (oc *OverlayClient) Stop() error {
 	return err
 }
 
-func (oc *OverlayClient) ShowMenu(romPath string) (*OverlayResponse, error) {
+func (oc *OverlayClient) ShowMenu() (*OverlayResponse, error) {
 	return oc.sendCommand(OverlayCommand{
-		Action:  "show_menu",
-		ROMPath: romPath,
+		Action: "show_menu",
 	})
 }
 

@@ -1,0 +1,19 @@
+{
+  "select": "Seleccionar",
+  "back": "Atrás",
+  "cancel": "Cancelar",
+  "quit": "Salir",
+  
+  "search": "Buscar",
+  
+  "resume": "Reanudar",
+  "save_state": "Guardar Estado",
+  "load_state": "Cargar Estado",
+  "reset_game": "Reiniciar Juego",
+  "settings": "Configuración",
+  
+  "saving": "Guardando",
+  "resetting": "Reiniciando",
+  "loading": "Cargando",
+  "quitting": "Saliendo"
+}

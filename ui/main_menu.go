@@ -42,8 +42,8 @@ func (m MainMenu) Draw() (models.ScreenReturn, error) {
 
 	options.EnableAction = true
 	options.FooterHelpItems = []gaba.FooterHelpItem{
-		{ButtonName: "X", HelpText: "Settings"},
-		{ButtonName: "A", HelpText: "Select"},
+		{ButtonName: "X", HelpText: utils.GetString("settings")},
+		{ButtonName: "A", HelpText: utils.GetString("select")},
 	}
 
 	sel, err := gaba.List(options)
@@ -84,8 +84,9 @@ func buildGameDirectoryMenuItems() ([]gaba.MenuItem, error) {
 	for _, item := range fb.Items {
 		if item.IsDirectory {
 			gameDirectory := item.ToDirectory()
+			tagless, _ := utils.ItemNameCleaner(gameDirectory.DisplayName, true)
 			menuItems = append(menuItems, gaba.MenuItem{
-				Text:     gameDirectory.DisplayName,
+				Text:     tagless,
 				Selected: false,
 				Focused:  false,
 				Metadata: gameDirectory,

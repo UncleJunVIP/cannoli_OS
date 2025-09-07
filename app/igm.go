@@ -22,24 +22,26 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type OverlayResponse struct {
-	Success bool   `json:"success"`
-	Action  string `json:"action"`
-	Data    string `json:"data,omitempty"`
-	Error   string `json:"error,omitempty"`
-}
-
 const (
-	shortPressMax = 2 * time.Second
-	coolDownTime  = 1 * time.Second
+	coolDownTime = 1 * time.Second
 )
+
+var localIP = getIPFromInterface("wlan0")
+
+var gameName string
 
 var wg sync.WaitGroup
 
 func main() {
+	if len(os.Args) < 2 {
+		log.Fatal("Usage: igm <game_name>")
+	}
+
+	gameName = os.Args[1]
+
 	initLogging()
 
-	utils.Logger.Println("Starting in-game overlay application...")
+	utils.Logger.Println(fmt.Sprintf("Starting in-game overlay application for %s...", gameName))
 
 	gaba.InitSDL(gaba.GabagoolOptions{
 		WindowTitle:    "In-Game Menu",
@@ -84,7 +86,6 @@ func menuButtonHandler(wg *sync.WaitGroup) {
 
 	for {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			utils.Logger.Printf("Button event: %v", event)
 			switch e := event.(type) {
 			case *sdl.KeyboardEvent:
 
@@ -120,26 +121,33 @@ func menuButtonHandler(wg *sync.WaitGroup) {
 }
 
 func toggleMenu() {
-	sendRetroArchCommand("MUTE", "192.168.1.102", "55355")
-
 	retroArchPID := getRetroArchPID()
 	if retroArchPID > 0 {
 		pauseRetroArch(retroArchPID)
 	}
 
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	gaba.ShowWindow()
-	igm(utils.GetRomPath())
+	command, message := igm()
 
-	if retroArchPID > 0 {
+	utils.Logger.Printf("In-game menu command: %s", command)
+
+	if command != "" {
+		if message != "" {
+			gaba.ProcessMessage(fmt.Sprintf("%s...", message), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
+				sendRetroArchCommand(command, localIP, "55355")
+				return nil, nil
+			})
+		} else {
+			sendRetroArchCommand(command, localIP, "55355")
+		}
+	} else {
 		resumeRetroArch(retroArchPID)
+		time.Sleep(250 * time.Millisecond)
 	}
 
-	time.Sleep(300 * time.Millisecond)
 	gaba.HideWindow()
-
-	sendRetroArchCommand("MUTE", "192.168.1.102", "55355")
 }
 
 func getRetroArchPID() int {
@@ -198,13 +206,13 @@ func resumeRetroArch(pid int) {
 	utils.Logger.Printf("Resumed RetroArch process %d", pid)
 }
 
-func igm(romPath string) {
-	utils.Logger.Printf("Showing in-game menu for ROM: %s", romPath)
+func igm() (string, string) {
+	utils.Logger.Printf("Showing in-game menu for ROM: %s", gameName)
 
 	currentScreen := ui.InGameMenu{
 		Data:     nil,
 		Position: models.Position{},
-		ROMPath:  romPath,
+		GameName: gameName,
 	}
 
 	for {
@@ -222,35 +230,22 @@ func igm(romPath string) {
 
 			switch action {
 			case "resume":
-				return
+				return "", ""
 
 			case "save_state":
-				err := sendRetroArchCommand("SAVE_STATE", "192.168.1.102", "55355")
-				if err != nil {
-					utils.ShowMessage("Failed to save state", 3000)
-				} else {
-					utils.ShowMessage("Saved!", 3000)
-				}
-				return
+				return "SAVE_STATE", utils.GetString("saving")
 
 			case "load_state":
-				sendRetroArchCommand("LOAD_STATE", "192.168.1.102", "55355")
-				return
+				return "LOAD_STATE", utils.GetString("loading")
 
 			case "reset":
-				sendRetroArchCommand("RESET", "192.168.1.102", "55355")
-				return
+				return "RESET", utils.GetString("resetting")
 
 			case "settings":
-				retroArchPID := getRetroArchPID()
-				resumeRetroArch(retroArchPID)
-				time.Sleep(250 * time.Millisecond)
-				sendRetroArchCommand("MENU_TOGGLE", "192.168.1.102", "55355")
-				return
+				return "MENU_TOGGLE", ""
 
 			case "quit":
-				sendRetroArchCommand("QUIT", "192.168.1.102", "55355")
-				return
+				return "QUIT", utils.GetString("quitting")
 			default:
 				utils.Logger.Printf("Unhandled menu action: %s", action)
 				continue
@@ -260,6 +255,12 @@ func igm(romPath string) {
 }
 
 func sendRetroArchCommand(command, host, port string) error {
+	retroArchPID := getRetroArchPID()
+
+	time.Sleep(750 * time.Millisecond)
+	resumeRetroArch(retroArchPID)
+	time.Sleep(250 * time.Millisecond)
+
 	addr, err := net.ResolveUDPAddr("udp", host+":"+port)
 	if err != nil {
 		return fmt.Errorf("failed to resolve UDP address: %v", err)
@@ -280,4 +281,26 @@ func sendRetroArchCommand(command, host, port string) error {
 
 	utils.Logger.Printf("Sent RetroArch UDP command: %s to %s:%s", command, host, port)
 	return nil
+}
+
+func getIPFromInterface(interfaceName string) string {
+	iface, err := net.InterfaceByName(interfaceName)
+	if err != nil {
+		return ""
+	}
+
+	addrs, err := iface.Addrs()
+	if err != nil {
+		return ""
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+
+	return ""
 }

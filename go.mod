@@ -5,10 +5,12 @@ go 1.24
 require github.com/UncleJunVIP/certifiable v1.0.0
 
 require (
-	github.com/UncleJunVIP/gabagool v0.0.68
+	github.com/UncleJunVIP/gabagool v0.0.69
 	github.com/craterdog/go-collection-framework/v7 v7.4.0
+	github.com/nicksnyder/go-i18n/v2 v2.6.0
 	github.com/veandco/go-sdl2 v0.4.40
 	go.uber.org/atomic v1.11.0
+	golang.org/x/text v0.28.0
 )
 
 require (

@@ -30,6 +30,7 @@ tasks:
       - cp build/cannoliOS build/igm launch.sh build/System
       - cp -R build/lib build/System
       - cp fonts/unifont-16.0.04.otf build/System/fonts/Cannoli.ttf
+      - cp -R resources/ build/System/resources
     silent: true
 
   cleanup:
@@ -40,6 +41,10 @@ tasks:
   adb:
     cmds:
       - adb push build/System /mnt/SDCARD
-      - adb shell killall cannoliOS
+      - adb shell killall cannoliOS igm retroarch
       - say Finished deploying Cannoli OS!
     silent: true
+
+  i18n:
+    cmds:
+      - adb push resources /mnt/SDCARD/System/resources/i18n

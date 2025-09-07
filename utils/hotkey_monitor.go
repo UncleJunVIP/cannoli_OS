@@ -20,13 +20,13 @@ func NewHotkeyMonitor() *HotkeyMonitor {
 	}
 }
 
-func (hm *HotkeyMonitor) Start(romPath string, overlayClient *OverlayClient) {
+func (hm *HotkeyMonitor) Start(overlayClient *OverlayClient) {
 	if hm.isActive {
 		return
 	}
 
 	hm.isActive = true
-	go hm.monitor(romPath, overlayClient)
+	go hm.monitor(overlayClient)
 }
 
 func (hm *HotkeyMonitor) Stop() {
@@ -38,7 +38,7 @@ func (hm *HotkeyMonitor) Stop() {
 	hm.isActive = false
 }
 
-func (hm *HotkeyMonitor) monitor(romPath string, overlayClient *OverlayClient) {
+func (hm *HotkeyMonitor) monitor(overlayClient *OverlayClient) {
 	Logger.Println("Starting hotkey monitor for in-game menu...")
 
 	ticker := time.NewTicker(100 * time.Millisecond)
@@ -58,7 +58,7 @@ func (hm *HotkeyMonitor) monitor(romPath string, overlayClient *OverlayClient) {
 
 			if hm.checkHotkey() {
 				Logger.Println("Hotkey detected - showing in-game menu")
-				response, err := overlayClient.ShowMenu(romPath)
+				response, err := overlayClient.ShowMenu()
 				if err != nil {
 					Logger.Printf("Failed to show menu: %v", err)
 					continue
