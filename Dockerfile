@@ -14,5 +14,6 @@ RUN GOWORK=off go mod download
 
 COPY . .
 RUN GOWORK=off go build -v -gcflags="all=-N -l" -o cannoliOS app/cannoli.go
+RUN GOWORK=off go build -v -gcflags="all=-N -l" -o igm app/igm.go
 
 CMD ["/bin/bash"]

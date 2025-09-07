@@ -1,14 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"cannoliOS/models"
 	"cannoliOS/ui"
-	"errors"
-	"fmt"
-	"log"
-	"os"
-	"os/exec"
+	"cannoliOS/utils"
 	"time"
 
 	_ "github.com/UncleJunVIP/certifiable"
@@ -16,12 +11,8 @@ import (
 	module "github.com/craterdog/go-collection-framework/v7"
 )
 
-var logger *log.Logger
-
 func init() {
-	initLogging()
-
-	logger.Println("Initializing cannoli OS...")
+	utils.Logger.Println("Initializing cannoli OS...")
 
 	gaba.InitSDL(gaba.GabagoolOptions{
 		WindowTitle:    "cannoli_OS",
@@ -29,32 +20,11 @@ func init() {
 		IsCannoli:      true,
 	})
 
-	logger.Println("SDL initialization completed")
-}
-
-func initLogging() {
-	if err := os.MkdirAll("logs", 0755); err != nil {
-		fmt.Printf("Failed to create logs directory: %v\n", err)
-		os.Exit(1)
-	}
-
-	timestamp := time.Now().Format("2006-01-02_15-04-05")
-	logFileName := fmt.Sprintf("logs/cannoli_%s.log", timestamp)
-
-	logFile, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Printf("Failed to open log file: %v\n", err)
-		os.Exit(1)
-	}
-
-	logger = log.New(logFile, "", log.LstdFlags|log.Lshortfile)
-
-	logger.Printf("=== Cannoli OS Started at %s ===", time.Now().Format(time.RFC3339))
+	utils.Logger.Println("SDL initialization completed")
 }
 
 func main() {
-	logger.Println("Starting main application loop")
-
+	logger := utils.Logger
 	var currentScreen models.Screen
 
 	currentScreen = ui.MainMenu{
@@ -157,6 +127,7 @@ func main() {
 
 				logger.Printf("Unhandled code in GameList: %v", sr.Code)
 			}
+
 		default:
 			logger.Printf("Unknown screen type: %s", currentScreen.Name())
 		}
@@ -164,121 +135,63 @@ func main() {
 }
 
 func launchRA() {
-	cmd := exec.Command("./retroarch", "--menu", "-c", "retroarch.cfg")
+	logger := utils.Logger
+	utils.ExecuteRetroArch([]string{"--menu", "-c", "retroarch.cfg"}, "RetroArch menu")
 
-	cmd.Dir = "/mnt/SDCARD/RetroArch"
-
-	logger.Printf("Executing command: %s %v in directory: %s", cmd.Path, cmd.Args, cmd.Dir)
-
-	cmd.Env = append(os.Environ(),
-		"LD_LIBRARY_PATH=/mnt/SDCARD/RetroArch/lib:/usr/trimui/lib:"+os.Getenv("LD_LIBRARY_PATH"),
-		"PATH=/usr/trimui/bin:"+os.Getenv("PATH"),
-	)
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	start := time.Now()
-	err := cmd.Run()
-	duration := time.Since(start)
-
-	stdoutStr := stdout.String()
-	stderrStr := stderr.String()
-
-	if stdoutStr != "" {
-		logger.Printf("Command stdout: %s", stdoutStr)
-	}
-	if stderrStr != "" {
-		logger.Printf("Command stderr: %s", stderrStr)
-	}
-
-	if err != nil {
-		logger.Printf("RetroArch execution failed after %v: %v", duration, err)
-		fmt.Println(err.Error())
-
-		if stdoutStr != "" {
-			fmt.Printf("stdout: %s\n", stdoutStr)
-		}
-		if stderrStr != "" {
-			fmt.Printf("stderr: %s\n", stderrStr)
-		}
-
-		var exitError *exec.ExitError
-		if errors.As(err, &exitError) {
-			logger.Printf("Process exited with code %d", exitError.ExitCode())
-			fmt.Printf("Process exited with code %d\n", exitError.ExitCode())
-		}
-	} else {
-		logger.Printf("RetroArch completed successfully after %v", duration)
-		fmt.Println("Executable completed successfully")
-
-		if stdoutStr != "" {
-			fmt.Printf("stdout: %s\n", stdoutStr)
-		}
-	}
-
-	logger.Println("Sleeping for 1750ms before returning to menu")
-	time.Sleep(1750 * time.Millisecond)
+	logger.Println("Sleeping for 2500ms before returning to menu")
+	time.Sleep(2500 * time.Millisecond)
 	logger.Println("Sleep completed, returning to application")
 }
 
 func launchROM(romPath string) {
-	logger.Printf("Starting RetroArch execution with ROM: %s", romPath)
+	logger := utils.Logger
+	logger.Printf("ROM path: %s", romPath)
 
-	var cmd *exec.Cmd
-
-	cmd = exec.Command("./retroarch", "-L", "/mnt/SDCARD/RetroArch/cores/gambatte_libretro.so", romPath, "-c", "retroarch.cfg")
-
-	cmd.Dir = "/mnt/SDCARD/RetroArch"
-
-	logger.Printf("Executing command: %s %v in directory: %s", cmd.Path, cmd.Args, cmd.Dir)
-
-	cmd.Env = append(os.Environ(),
-		"LD_LIBRARY_PATH=/mnt/SDCARD/RetroArch/lib:/usr/trimui/lib:"+os.Getenv("LD_LIBRARY_PATH"),
-		"PATH=/usr/trimui/bin:"+os.Getenv("PATH"),
-	)
-
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	start := time.Now()
-	err := cmd.Run()
-	duration := time.Since(start)
-
-	stdoutStr := stdout.String()
-	stderrStr := stderr.String()
-
-	if stdoutStr != "" {
-		logger.Printf("Command stdout: %s", stdoutStr)
-	}
-	if stderrStr != "" {
-		logger.Printf("Command stderr: %s", stderrStr)
-	}
-
+	// Start the overlay application in the background
+	overlayClient := utils.GetOverlayClient()
+	err := overlayClient.Start()
 	if err != nil {
-		logger.Printf("RetroArch execution failed after %v: %v", duration, err)
-		fmt.Println(err.Error())
-
-		if stdoutStr != "" {
-			fmt.Printf("stdout: %s\n", stdoutStr)
-		}
-		if stderrStr != "" {
-			fmt.Printf("stderr: %s\n", stderrStr)
-		}
-
-		var exitError *exec.ExitError
-		if errors.As(err, &exitError) {
-			logger.Printf("Process exited with code %d", exitError.ExitCode())
-			fmt.Printf("Process exited with code %d\n", exitError.ExitCode())
-		}
+		logger.Printf("Failed to start overlay: %v", err)
 	} else {
-		logger.Printf("RetroArch completed successfully after %v", duration)
-		fmt.Println("Executable completed successfully")
+		logger.Println("IGM overlay started successfully")
+	}
 
-		if stdoutStr != "" {
-			fmt.Printf("stdout: %s\n", stdoutStr)
+	// Start RetroArch with process tracking
+	process := utils.ExecuteRetroArchWithTracking([]string{
+		"-L", "/mnt/SDCARD/RetroArch/cores/gambatte_libretro.so",
+		romPath,
+		"-c", "retroarch.cfg",
+	}, "RetroArch with ROM")
+
+	if process != nil {
+		// Start hotkey monitoring in background
+		monitor := utils.NewHotkeyMonitor()
+		monitor.Start(romPath, overlayClient)
+
+		// Wait for RetroArch to exit - this blocks until the process ends
+		process.Wait()
+
+		// Clean up after RetroArch exits
+		monitor.Stop()
+		logger.Println("RetroArch exited, stopping overlay and monitor")
+	}
+
+	// Stop overlay
+	overlayClient.Stop()
+
+	logger.Println("Game session ended, returning to main menu")
+}
+
+func startHotkeyMonitoring(romPath string, overlayClient *utils.OverlayClient) {
+	monitor := utils.NewHotkeyMonitor()
+	monitor.Start(romPath, overlayClient)
+
+	// Wait for RetroArch to exit or be killed
+	for {
+		if !utils.IsRetroArchRunning() {
+			monitor.Stop()
+			break
 		}
+		time.Sleep(1 * time.Second)
 	}
 }

@@ -11,3 +11,4 @@
 /data/*
 /.env
 /containers/RetroArch/build/
+/logs/*

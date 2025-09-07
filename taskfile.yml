@@ -21,14 +21,15 @@ tasks:
     cmds:
       - docker create --name extract retro-console-arm64
       - docker cp extract:/build/cannoliOS build/cannoliOS
+      - docker cp extract:/build/igm build/igm
       - docker cp extract:/usr/lib/aarch64-linux-gnu/libSDL2_gfx-1.0.so.0.0.2 build/lib/libSDL2_gfx-1.0.so.0
       - rm -rf build/System || true
       - mkdir -p build/System
       - mkdir -p build/System/lib
       - mkdir -p build/System/fonts
-      - cp build/cannoliOS launch.sh build/System
+      - cp build/cannoliOS build/igm launch.sh build/System
       - cp -R build/lib build/System
-      - cp fonts/AnalogueOS-Regular.ttf build/System/fonts/Cannoli.ttf
+      - cp fonts/unifont-16.0.04.otf build/System/fonts/Cannoli.ttf
     silent: true
 
   cleanup:
@@ -38,7 +39,7 @@ tasks:
 
   adb:
     cmds:
-      - adb push build/cannoliOS /mnt/SDCARD/System
+      - adb push build/System /mnt/SDCARD
       - adb shell killall cannoliOS
       - say Finished deploying Cannoli OS!
     silent: true

@@ -3,10 +3,11 @@ package models
 type ScreenName string
 
 const (
-	MainMenu  ScreenName = "MainMenu"
-	GameList  ScreenName = "GameList"
-	ToolsList ScreenName = "ToolsList"
-	Settings  ScreenName = "Settings"
+	MainMenu   ScreenName = "MainMenu"
+	GameList   ScreenName = "GameList"
+	ToolsList  ScreenName = "ToolsList"
+	Settings   ScreenName = "Settings"
+	InGameMenu ScreenName = "InGameMenu"
 )
 
 type Screen interface {

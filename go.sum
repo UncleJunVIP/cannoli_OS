@@ -10,6 +10,10 @@ github.com/UncleJunVIP/gabagool v0.0.65 h1:8kFHT3Ob6pnM8RlafrZ9J02xmfmw370oCw/GN
 github.com/UncleJunVIP/gabagool v0.0.65/go.mod h1:m9myn3onXF9duenLShS+lDJ+EZDvimZQpUVea5W9TQ4=
 github.com/UncleJunVIP/gabagool v0.0.66 h1:WqohxMb1YJdvrfwv4BgHAoO9HrR77Qn72Hew8Q+ypLA=
 github.com/UncleJunVIP/gabagool v0.0.66/go.mod h1:m9myn3onXF9duenLShS+lDJ+EZDvimZQpUVea5W9TQ4=
+github.com/UncleJunVIP/gabagool v0.0.67 h1:Ej7kgQ2ImhXra1ZqATF2P6G0VpNnnoaSSox36LgTcUs=
+github.com/UncleJunVIP/gabagool v0.0.67/go.mod h1:m9myn3onXF9duenLShS+lDJ+EZDvimZQpUVea5W9TQ4=
+github.com/UncleJunVIP/gabagool v0.0.68 h1:4EpZNYTM8kCTNH5pzHAl36XhUzKxgqUzla1FqjJegO0=
+github.com/UncleJunVIP/gabagool v0.0.68/go.mod h1:b+7yRVojxZNEg2kMgUM4KG9TZE6xQPViA1hX+xx/oFc=
 github.com/craterdog/go-collection-framework/v7 v7.4.0 h1:sU+WAjw9WlSoGFCd3GgtVaHg+kJcMAfWnkeTPOdC78E=
 github.com/craterdog/go-collection-framework/v7 v7.4.0/go.mod h1:SEAnvw+YEEGhchxDsO9MgOj8K7pycfBPM2t8dDdN/jo=
 github.com/craterdog/go-missing-utilities/v7 v7.5.0 h1:Bymc0kgrzt10itgqzLP2hJCO8jFIeG7e65O0lqA4RJE=
@@ -24,6 +28,8 @@ github.com/holoplot/go-evdev v0.0.0-20250804134636-ab1d56a1fe83 h1:B+A58zGFuDrvE
 github.com/holoplot/go-evdev v0.0.0-20250804134636-ab1d56a1fe83/go.mod h1:iHAf8OIncO2gcQ8XOjS7CMJ2aPbX2Bs0wl5pZyanEqk=
 github.com/kettek/apng v0.0.0-20220823221153-ff692776a607 h1:8tP9cdXzcGX2AvweVVG/lxbI7BSjWbNNUustwJ9dQVA=
 github.com/kettek/apng v0.0.0-20220823221153-ff692776a607/go.mod h1:x78/VRQYKuCftMWS0uK5e+F5RJ7S4gSlESRWI0Prl6Q=
+github.com/kettek/apng v0.0.0-20250827064933-2bb5f5fcf253 h1:ar6YqPcuumkcWgAJHkmda6Q35V3OnpxeTej4iU/QFLA=
+github.com/kettek/apng v0.0.0-20250827064933-2bb5f5fcf253/go.mod h1:x78/VRQYKuCftMWS0uK5e+F5RJ7S4gSlESRWI0Prl6Q=
 github.com/patrickhuber/go-types v0.6.0 h1:WYAsdXniinKzQZdxC0wvORwtZX8C670tvguslefRMGI=
 github.com/patrickhuber/go-types v0.6.0/go.mod h1:fkCDj9+Mfd2t7x0vb8EQywoa1vhBp+G8AW7M5kz7rnc=
 github.com/patrickhuber/go-types v0.6.2 h1:NeGKOlAjkJRCIrQjm9J7DjSJfa2hFcs2T0v61XMRWhg=

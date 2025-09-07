@@ -38,8 +38,7 @@ func (m MainMenu) Draw() (models.ScreenReturn, error) {
 	options.SelectedIndex = selectedIndex
 	options.VisibleStartIndex = visibleStartIndex
 	options.DisableBackButton = true
-
-	options.EnableMultiSelect = true
+	options.EnableMultiSelect = false
 
 	options.EnableAction = true
 	options.FooterHelpItems = []gaba.FooterHelpItem{
