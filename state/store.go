@@ -2,8 +2,9 @@ package state
 
 import (
 	"cannoliOS/models"
-	"go.uber.org/atomic"
 	"sync"
+
+	"go.uber.org/atomic"
 )
 
 var appState atomic.Pointer[models.AppState]
