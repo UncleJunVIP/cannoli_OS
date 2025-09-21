@@ -33,7 +33,7 @@ This started as an experiment to see if I could make a lightweight launcher for 
 
 # Targeted Features
 
-- [ ] Simple Directory Structure
+- [x] Simple Directory Structure
 
 - [ ] Manage Roms
     - [ ] Rename
@@ -49,7 +49,7 @@ This started as an experiment to see if I could make a lightweight launcher for 
     - [ ] Add / Remove / Reorder Games
     - [ ] Search
 
-- [ ] Custom Background Image
+- [x] Custom Background Image
 
 - [ ] Settings
     - [ ] Platform Core Selection
@@ -60,7 +60,7 @@ This started as an experiment to see if I could make a lightweight launcher for 
 
 # Features Never To Be Implemented
 
-- Single SD Card supporting multiple platforms
+- Single SD Card supporting multiple devices
 - Theming beyond a single background image
 - Game Time Tracker
 - LED Control
