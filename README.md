@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/resources/cannoli.png" width="256px" alt="A cannoli you silly goose!">
+<img src=".github/resources/cannoli_nobg.png" width="256px" alt="A cannoli you silly goose!">
 <h3 style="font-size: 35px; padding-top: 0px; margin-top: 5px;">
 cannoli_OS    
 </h3>
@@ -39,11 +39,17 @@ for RetroArch on the TrimUI Brick.
 
 - [x] Simple Directory Structure
 
+- [ ] In-Game Menu
+    - [ ] Save State with Slots
+    - [ ] Load State with Slots
+    - [x] Reset Game
+    - [x] RetroArch Menu
+    - [x] Quit Game
+
 - [ ] Manage Roms
     - [ ] Rename
     - [ ] Delete
     - [ ] Move
-    - [ ] Copy
     - [ ] Search
 
 - [ ] Collections
@@ -56,8 +62,9 @@ for RetroArch on the TrimUI Brick.
 - [x] Custom Background Image
 
 - [ ] Settings
-    - [ ] Platform Core Selection
+    - [ ] Platform Core Mapping
     - [ ] Wi-Fi
+    - [ ] Services Menu
     - [ ] Launch RetroArch Menu
 
 --- 
