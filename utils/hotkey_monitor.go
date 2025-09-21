@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"time"
 )
@@ -10,6 +11,7 @@ type HotkeyMonitor struct {
 	ctx      context.Context
 	cancel   context.CancelFunc
 	isActive bool
+	logger   *slog.Logger
 }
 
 func NewHotkeyMonitor() *HotkeyMonitor {
@@ -17,6 +19,7 @@ func NewHotkeyMonitor() *HotkeyMonitor {
 	return &HotkeyMonitor{
 		ctx:    ctx,
 		cancel: cancel,
+		logger: GetLoggerInstance(),
 	}
 }
 
@@ -39,7 +42,7 @@ func (hm *HotkeyMonitor) Stop() {
 }
 
 func (hm *HotkeyMonitor) monitor(overlayClient *OverlayClient) {
-	Logger.Println("Starting hotkey monitor for in-game menu...")
+	hm.logger.Debug("Starting hotkey monitor for in-game menu...")
 
 	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
@@ -47,27 +50,27 @@ func (hm *HotkeyMonitor) monitor(overlayClient *OverlayClient) {
 	for {
 		select {
 		case <-hm.ctx.Done():
-			Logger.Println("Hotkey monitor stopped")
+			hm.logger.Debug("Hotkey monitor stopped")
 			return
 		case <-ticker.C:
 			// Only monitor if RetroArch is still running
 			if !IsRetroArchRunning() {
-				Logger.Println("RetroArch not running, stopping hotkey monitor")
+				hm.logger.Debug("RetroArch not running, stopping hotkey monitor")
 				return
 			}
 
 			if hm.checkHotkey() {
-				Logger.Println("Hotkey detected - showing in-game menu")
+				hm.logger.Debug("Hotkey detected - showing in-game menu")
 				response, err := overlayClient.ShowMenu()
 				if err != nil {
-					Logger.Printf("Failed to show menu: %v", err)
+					hm.logger.Debug("Failed to show menu: %v", err)
 					continue
 				}
 
-				Logger.Printf("Menu response: %s", response.Action)
+				hm.logger.Debug("Menu response: %s", response.Action)
 
 				if response.Action == "exit_game" {
-					Logger.Println("User requested exit - terminating RetroArch")
+					hm.logger.Debug("User requested exit - terminating RetroArch")
 					return
 				}
 

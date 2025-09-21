@@ -7,15 +7,15 @@ import (
 )
 
 const (
-	systemPath      = "/System"
-	biosPath        = "/BIOS"
-	romsPath        = "/Roms"
-	cheatsPath      = "/Cheats"
-	collectionsPath = "/Collections"
-	archivesPath    = "/Archives"
-	savesPath       = "/Saves"
-	saveStatePath   = "/Save States"
-	settingsPath    = "/Settings"
+	systemPath      = "System"
+	biosPath        = "BIOS"
+	romsPath        = "Roms"
+	cheatsPath      = "Cheats"
+	collectionsPath = "Collections"
+	archivesPath    = "Archives"
+	savesPath       = "Saves"
+	saveStatePath   = "Save States"
+	settingsPath    = "Settings"
 )
 
 var OrderedFolderRegex = regexp.MustCompile(`\d+\)\s`)

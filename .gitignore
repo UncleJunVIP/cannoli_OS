@@ -12,3 +12,5 @@
 /.env
 /containers/RetroArch/build/
 /logs/*
+/igm
+/config.json

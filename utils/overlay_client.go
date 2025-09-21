@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"os/exec"
@@ -14,6 +15,7 @@ type OverlayClient struct {
 	overlayProcess *os.Process
 	isRunning      bool
 	GameName       string
+	logger         *slog.Logger
 }
 
 type OverlayCommand struct {
@@ -33,6 +35,7 @@ func NewOverlayClient(game string) *OverlayClient {
 	return &OverlayClient{
 		isRunning: false,
 		GameName:  game,
+		logger:    GetLoggerInstance(),
 	}
 }
 
@@ -41,10 +44,13 @@ func (oc *OverlayClient) Start() error {
 		return nil
 	}
 
-	Logger.Println("Starting overlay application...")
+	oc.logger.Debug("Starting overlay application...")
 
 	cmd := exec.Command("./igm", oc.GameName)
-	cmd.Dir = "/mnt/SDCARD/System"
+
+	if os.Getenv("ENVIRONMENT") != "DEV" {
+		cmd.Dir = "/mnt/SDCARD/System"
+	}
 
 	err := cmd.Start()
 	if err != nil {
@@ -56,7 +62,7 @@ func (oc *OverlayClient) Start() error {
 
 	time.Sleep(500 * time.Millisecond)
 
-	Logger.Printf("Overlay application started with PID: %d", cmd.Process.Pid)
+	oc.logger.Debug("Overlay application started with PID: %d", cmd.Process.Pid)
 	return nil
 }
 
@@ -65,20 +71,20 @@ func (oc *OverlayClient) Stop() error {
 		return nil
 	}
 
-	Logger.Println("Stopping overlay application...")
+	oc.logger.Debug("Stopping overlay application...")
 
 	err := oc.overlayProcess.Signal(syscall.SIGTERM)
 	if err != nil {
-		Logger.Printf("Failed to send SIGTERM to overlay process: %v", err)
+		oc.logger.Debug("Failed to send SIGTERM to overlay process: %v", err)
 		err = oc.overlayProcess.Kill()
 		if err != nil {
-			Logger.Printf("Failed to kill overlay process: %v", err)
+			oc.logger.Debug("Failed to kill overlay process: %v", err)
 		}
 	}
 
 	_, waitErr := oc.overlayProcess.Wait()
 	if waitErr != nil {
-		Logger.Printf("Error waiting for overlay process to exit: %v", waitErr)
+		oc.logger.Debug("Error waiting for overlay process to exit: %v", waitErr)
 	}
 
 	os.Remove("/tmp/cannoli_overlay.sock")

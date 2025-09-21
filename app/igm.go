@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -39,11 +38,11 @@ func main() {
 
 	gameName = os.Args[1]
 
-	initLogging()
+	logger := utils.GetLoggerInstance()
 
-	utils.Logger.Println(fmt.Sprintf("Starting in-game overlay application for %s...", gameName))
+	logger.Debug(fmt.Sprintf("Starting in-game overlay application for %s...", gameName))
 
-	gaba.InitSDL(gaba.GabagoolOptions{
+	gaba.InitSDL(gaba.Options{
 		WindowTitle:    "In-Game Menu",
 		ShowBackground: true,
 		IsCannoli:      true,
@@ -55,27 +54,7 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	<-c
-	utils.Logger.Println("Shutting down overlay application...")
-}
-
-func initLogging() {
-	logDir := "logs/igm"
-
-	if err := os.MkdirAll(logDir, 0755); err != nil {
-		log.Printf("Failed to create log directory %s: %v", logDir, err)
-		return
-	}
-
-	logFile := filepath.Join(logDir, fmt.Sprintf("igm_%s.log", time.Now().Format("2006-01-02")))
-
-	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Printf("Failed to open log file %s: %v", logFile, err)
-		return
-	}
-
-	utils.Logger = log.New(file, "", log.LstdFlags|log.Lshortfile)
-	utils.Logger.Printf("=== IGM Started at %s ===", time.Now().Format(time.RFC3339))
+	logger.Debug("Shutting down overlay application...")
 }
 
 func menuButtonHandler(wg *sync.WaitGroup) {
@@ -121,6 +100,8 @@ func menuButtonHandler(wg *sync.WaitGroup) {
 }
 
 func toggleMenu() {
+	logger := utils.GetLoggerInstance()
+
 	retroArchPID := getRetroArchPID()
 	if retroArchPID > 0 {
 		pauseRetroArch(retroArchPID)
@@ -131,16 +112,16 @@ func toggleMenu() {
 	gaba.ShowWindow()
 	command, message := igm()
 
-	utils.Logger.Printf("In-game menu command: %s", command)
+	logger.Debug("In-game menu command: %s", command)
 
 	if command != "" {
 		if message != "" {
 			gaba.ProcessMessage(fmt.Sprintf("%s...", message), gaba.ProcessMessageOptions{}, func() (interface{}, error) {
-				sendRetroArchCommand(command, localIP, "55355")
+				sendRetroArchCommand(command, localIP, "55355", true)
 				return nil, nil
 			})
 		} else {
-			sendRetroArchCommand(command, localIP, "55355")
+			sendRetroArchCommand(command, localIP, "55355", true)
 		}
 	} else {
 		resumeRetroArch(retroArchPID)
@@ -151,23 +132,25 @@ func toggleMenu() {
 }
 
 func getRetroArchPID() int {
+	logger := utils.GetLoggerInstance()
+
 	cmd := exec.Command("pgrep", "-f", "retroarch")
 	output, err := cmd.Output()
 	if err != nil {
-		utils.Logger.Printf("Failed to find RetroArch process: %v", err)
+		logger.Error("Failed to find RetroArch process", "error", err)
 		return 0
 	}
 
 	pidStr := strings.TrimSpace(string(output))
 	if pidStr == "" {
-		utils.Logger.Printf("No RetroArch process found")
+		logger.Debug("No RetroArch process found")
 		return 0
 	}
 
 	pids := strings.Split(pidStr, "\n")
 	pid, err := strconv.Atoi(pids[0])
 	if err != nil {
-		utils.Logger.Printf("Failed to parse RetroArch PID: %v", err)
+		logger.Error("Failed to parse RetroArch PID", "error", err)
 		return 0
 	}
 
@@ -175,39 +158,47 @@ func getRetroArchPID() int {
 }
 
 func pauseRetroArch(pid int) {
+	logger := utils.GetLoggerInstance()
+
+	time.Sleep(250 * time.Millisecond)
+
 	process, err := os.FindProcess(pid)
 	if err != nil {
-		utils.Logger.Printf("Failed to find RetroArch process %d: %v", pid, err)
+		logger.Error("Failed to find RetroArch process", "error", err)
 		return
 	}
 
 	err = process.Signal(syscall.SIGSTOP)
 	if err != nil {
-		utils.Logger.Printf("Failed to pause RetroArch process %d: %v", pid, err)
+		logger.Error("Failed to pause RetroArch process", "error", err)
 		return
 	}
 
-	utils.Logger.Printf("Paused RetroArch process %d", pid)
+	logger.Debug("Paused RetroArch process", "pid", pid)
 }
 
 func resumeRetroArch(pid int) {
+	logger := utils.GetLoggerInstance()
+
 	process, err := os.FindProcess(pid)
 	if err != nil {
-		utils.Logger.Printf("Failed to find RetroArch process %d: %v", pid, err)
+		logger.Error("Failed to find RetroArch process", "error", err, "pid", pid)
 		return
 	}
 
 	err = process.Signal(syscall.SIGCONT)
 	if err != nil {
-		utils.Logger.Printf("Failed to resume RetroArch process %d: %v", pid, err)
+		logger.Error("Failed to resume RetroArch process", "error", err, "pid", pid)
 		return
 	}
 
-	utils.Logger.Printf("Resumed RetroArch process %d", pid)
+	logger.Debug("Resumed RetroArch process", "pid", pid)
 }
 
 func igm() (string, string) {
-	utils.Logger.Printf("Showing in-game menu for ROM: %s", gameName)
+	logger := utils.GetLoggerInstance()
+
+	logger.Debug("Showing in-game menu for ROM", "game_name", gameName)
 
 	currentScreen := ui.InGameMenu{
 		Data:     nil,
@@ -218,7 +209,7 @@ func igm() (string, string) {
 	for {
 		sr, err := currentScreen.Draw()
 		if err != nil {
-			utils.Logger.Printf("Error drawing in-game menu: %v", err)
+			logger.Error("Error drawing in-game menu", "error", err)
 		}
 
 		switch sr.Code {
@@ -226,7 +217,7 @@ func igm() (string, string) {
 
 		case models.Select:
 			action := sr.Output.(string)
-			utils.Logger.Printf("In-game menu action: %s", action)
+			logger.Debug("In-game menu action", "action", action)
 
 			switch action {
 			case "resume":
@@ -247,19 +238,23 @@ func igm() (string, string) {
 			case "quit":
 				return "QUIT", utils.GetString("quitting")
 			default:
-				utils.Logger.Printf("Unhandled menu action: %s", action)
+				logger.Debug("Unhandled menu action", "action", action)
 				continue
 			}
 		}
 	}
 }
 
-func sendRetroArchCommand(command, host, port string) error {
+func sendRetroArchCommand(command, host, port string, resume bool) error {
+	logger := utils.GetLoggerInstance()
+
 	retroArchPID := getRetroArchPID()
 
-	time.Sleep(750 * time.Millisecond)
-	resumeRetroArch(retroArchPID)
-	time.Sleep(250 * time.Millisecond)
+	if resume {
+		time.Sleep(750 * time.Millisecond)
+		resumeRetroArch(retroArchPID)
+		time.Sleep(250 * time.Millisecond)
+	}
 
 	addr, err := net.ResolveUDPAddr("udp", host+":"+port)
 	if err != nil {
@@ -279,7 +274,7 @@ func sendRetroArchCommand(command, host, port string) error {
 		return fmt.Errorf("failed to send UDP command: %v", err)
 	}
 
-	utils.Logger.Printf("Sent RetroArch UDP command: %s to %s:%s", command, host, port)
+	logger.Debug("Sent RetroArch UDP command", "command", command, "host", host, "port", port)
 	return nil
 }
 

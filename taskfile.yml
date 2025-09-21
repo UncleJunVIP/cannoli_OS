@@ -28,6 +28,7 @@ tasks:
       - mkdir -p build/System/lib
       - mkdir -p build/System/fonts
       - cp build/cannoliOS build/igm launch.sh build/System
+      - cp resources/configs/config-brick.json build/System/config.json
       - cp -R build/lib build/System
       - cp fonts/unifont-16.0.04.otf build/System/fonts/Cannoli.ttf
       - cp -R resources/ build/System/resources

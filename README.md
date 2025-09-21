@@ -15,7 +15,11 @@ cannoli_OS
 
 `¯\_(ツ)_/¯`
 
-This started as an experiment to see if I could make a lightweight launcher for RetroArch on the TrimUI Brick.
+I built the [Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) Pak
+for [NextUI](https://nextui.loveretro.games) and thought isn't this essentially a launch launcher?
+
+This started as an experiment using everything I learned making these Paks to see if I could make a lightweight launcher
+for RetroArch on the TrimUI Brick.
 
 --- 
 

@@ -1,6 +1,10 @@
 package utils
 
 import (
+	"cannoliOS/models"
+	"encoding/json"
+	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -42,4 +46,18 @@ func ItemNameCleaner(filename string, stripTag bool) (string, string) {
 	foundTag = strings.ReplaceAll(foundTag, ")", "")
 
 	return cleaned, foundTag
+}
+
+func LoadConfig(filePath string) (*models.Config, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config file: %w", err)
+	}
+
+	var config models.Config
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON config: %w", err)
+	}
+
+	return &config, nil
 }

@@ -1,0 +1,15 @@
+{
+  "retroarch_directory": "/mnt/SDCARD/System/RetroArch/",
+  "cores_directory": "/mnt/SDCARD/System/RetroArch/cores/",
+  "core_mapping": {
+    "GBC": "gambatte",
+    "GB": "gambatte",
+    "GBA": "mgba",
+    "MGBA": "mgba",
+    "NES": "nestopia",
+    "SNES": "snes9x"
+  },
+  "show_art": false,
+  "hide_empty_directories": true,
+  "log_level": "debug"
+}

@@ -91,7 +91,7 @@ func (gl GameList) Draw() (models.ScreenReturn, error) {
 	options.FooterHelpItems = []gabagool.FooterHelpItem{
 		{ButtonName: "B", HelpText: utils.GetString("back")},
 		{ButtonName: "X", HelpText: utils.GetString("search")},
-		{ButtonName: "Menu", HelpText: "REPLACE ME"},
+		{ButtonName: "Menu", HelpText: utils.GetString("help")},
 	}
 
 	appState := state.Get()
