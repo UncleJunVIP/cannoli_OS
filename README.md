@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src=".github/resources/cannoli.png" width="auto" alt="A cannoli you silly goose!">
+<img src=".github/resources/cannoli.png" width="256px" alt="A cannoli you silly goose!">
 <h3 style="font-size: 35px; padding-top: 0px; margin-top: 5px;">
 cannoli_OS    
 </h3>
