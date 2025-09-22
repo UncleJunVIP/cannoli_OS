@@ -1,11 +1,11 @@
 <div align="center">
 
 <img src=".github/resources/cannoli_nobg.png" width="256px" alt="A cannoli you silly goose!">
-<h3 style="font-size: 35px; padding-top: 0px; padding-bottom: 0px; margin-bottom: 0px; margin-top: 5px;">
+<h3 style="font-size:35px; padding-top:0px; padding-bottom:0px; margin-bottom: 0px; margin-top: 5px;">
 cannoli_OS    
 </h3>
 
-<h4 style="font-size: 18px; padding-top: 0px; margin-top: 0px;">A no-frills launcher for retro gaming.</h4>
+<h4 style="font-size:18px; padding-top:0px; margin-top:0px;">A no-frills launcher for retro gaming.</h4>
 
 </div>
 
@@ -18,16 +18,15 @@ cannoli_OS
 I built the [Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) Pak
 for [NextUI](https://nextui.loveretro.games) and thought isn't this essentially a launch launcher?
 
-Taking what I've learned from building Paks, I wanted to try building a no-frills launcher for RetroArch.
+Taking what I've learned from building Paks, I wanted to try building a no-frills launcher backed by RetroArch.
 
 --- 
 
 # Design Goals
 
-- Lightweight
 - Minimal Configuration
-- Easy to do basic things
 - Easy to add new games
+- Easy to do basic things
 - Full access to RetroArch
 - Judicious addition of features
 - All binaries of known provenance
@@ -60,6 +59,10 @@ Taking what I've learned from building Paks, I wanted to try building a no-frill
 
 - [x] Custom Background Image
 
+- [ ] Change Interface Colors
+
+- [ ] Compatability with the MinUI Pak Format for Tools
+
 - [ ] Settings
     - [ ] Platform Core Mapping
     - [ ] Wi-Fi
@@ -68,10 +71,10 @@ Taking what I've learned from building Paks, I wanted to try building a no-frill
 
 --- 
 
-# Features Never To Be Implemented
+# Features That Will Not Be Considered nor Implemented
 
 - Single SD Card supporting multiple devices
-- Theming beyond a single background image
+- Themes
 - Game Time Tracker
 - LED Control
 - Bluetooth
