@@ -2,6 +2,7 @@ package utils
 
 import (
 	"cannoliOS/models"
+	"cannoliOS/state"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,11 +10,9 @@ import (
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 )
 
-var config *models.Config
-
 func Init() {
 	var err error
-	config, err = LoadConfig("config.json")
+	config, err := LoadConfig("config.json")
 
 	if err != nil {
 		GetLoggerInstance().Error("Failed to load config.json", "error", err)
@@ -27,6 +26,8 @@ func Init() {
 		os.Exit(1)
 	}
 
+	state.Init(config)
+
 	GetLoggerInstance().Info("=== Cannoli OS Started ===")
 }
 
@@ -35,5 +36,5 @@ func GetLoggerInstance() *slog.Logger {
 }
 
 func GetConfig() *models.Config {
-	return config
+	return state.Get().Config
 }

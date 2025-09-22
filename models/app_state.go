@@ -5,6 +5,6 @@ import (
 )
 
 type AppState struct {
-	Config      Config
+	Config      *Config
 	ScreenStack gcf.StackLike[string]
 }

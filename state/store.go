@@ -10,15 +10,15 @@ import (
 var appState atomic.Pointer[models.AppState]
 var onceAppState sync.Once
 
-func Get() *models.AppState {
+func Init(config *models.Config) {
 	onceAppState.Do(func() {
 		appState.Store(&models.AppState{
-			Config: models.Config{
-				ShowArt:              false,
-				HideEmptyDirectories: true,
-			},
+			Config: config,
 		})
 	})
+}
+
+func Get() *models.AppState {
 	return appState.Load()
 }
 

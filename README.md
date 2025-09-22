@@ -1,11 +1,11 @@
 <div align="center">
 
 <img src=".github/resources/cannoli_nobg.png" width="256px" alt="A cannoli you silly goose!">
-<h3 style="font-size: 35px; padding-top: 0px; margin-top: 5px;">
+<h3 style="font-size: 35px; padding-top: 0px; padding-bottom: 0px; margin-bottom: 0px; margin-top: 5px;">
 cannoli_OS    
 </h3>
 
-<h4 style="font-size: 18px;">A no-frills launcher for retro gaming.</h4>
+<h4 style="font-size: 18px; padding-top: 0px; margin-top: 0px;">A no-frills launcher for retro gaming.</h4>
 
 </div>
 
@@ -18,8 +18,7 @@ cannoli_OS
 I built the [Game Manager](https://github.com/UncleJunVIP/nextui-game-manager) Pak
 for [NextUI](https://nextui.loveretro.games) and thought isn't this essentially a launch launcher?
 
-This started as an experiment using everything I learned making these Paks to see if I could make a lightweight launcher
-for RetroArch on the TrimUI Brick.
+Taking what I've learned from building Paks, I wanted to try building a no-frills launcher for RetroArch.
 
 --- 
 

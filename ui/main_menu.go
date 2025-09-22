@@ -20,17 +20,9 @@ func (m MainMenu) Name() models.ScreenName {
 func (m MainMenu) Draw() (models.ScreenReturn, error) {
 	var menuItems []gaba.MenuItem
 
-	gameMenuItems, err := buildGameDirectoryMenuItems()
-	if err != nil {
-		// TODO fix this
-	}
+	gameMenuItems := buildGameDirectoryMenuItems()
 
 	menuItems = append(menuItems, gameMenuItems...)
-
-	menuItems = append(menuItems, gaba.MenuItem{
-		Text:     "RetroArch",
-		Metadata: models.Directory{DisplayName: "RetroArch"},
-	})
 
 	options := gaba.DefaultListOptions("cannoli_OS", menuItems)
 
@@ -39,17 +31,14 @@ func (m MainMenu) Draw() (models.ScreenReturn, error) {
 	options.VisibleStartIndex = visibleStartIndex
 	options.DisableBackButton = true
 	options.EnableMultiSelect = false
-
 	options.EnableAction = true
+
 	options.FooterHelpItems = []gaba.FooterHelpItem{
-		{ButtonName: "X", HelpText: utils.GetString("settings")},
+		{ButtonName: "X", HelpText: utils.GetString("tools")},
 		{ButtonName: "A", HelpText: utils.GetString("select")},
 	}
 
-	sel, err := gaba.List(options)
-	if err != nil {
-		// TODO do something
-	}
+	sel, _ := gaba.List(options)
 
 	if sel.IsSome() && sel.Unwrap().ActionTriggered {
 		return models.ScreenReturn{
@@ -72,12 +61,12 @@ func (m MainMenu) Draw() (models.ScreenReturn, error) {
 	}, nil
 }
 
-func buildGameDirectoryMenuItems() ([]gaba.MenuItem, error) {
+func buildGameDirectoryMenuItems() []gaba.MenuItem {
 	fb := utils.NewFileBrowser()
 
 	if err := fb.CWD(utils.GetRomPath(), state.Get().Config.HideEmptyDirectories); err != nil {
+		utils.GetLoggerInstance().Error("Failed to fetch ROM directories", "error", err)
 		utils.ShowMessage("Error fetching ROM directories", 5000)
-		return nil, err
 	}
 
 	var menuItems []gaba.MenuItem
@@ -94,5 +83,5 @@ func buildGameDirectoryMenuItems() ([]gaba.MenuItem, error) {
 		}
 	}
 
-	return menuItems, nil
+	return menuItems
 }

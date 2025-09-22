@@ -106,7 +106,7 @@ func runRA(args []string, gameName string) *exec.Cmd {
 	logger.Debug(fmt.Sprintf("Starting %s", gameName))
 
 	cmd := exec.Command("./retroarch", args...)
-	cmd.Dir = config.RetroArchDirectory
+	cmd.Dir = GetConfig().RetroArchDirectory
 
 	if os.Getenv("ENVIRONMENT") != "DEV" {
 		cmd.Env = append(os.Environ(),
