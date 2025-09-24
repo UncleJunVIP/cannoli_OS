@@ -71,6 +71,7 @@ func (igm InGameMenu) Draw() (models.ScreenReturn, error) {
 	options.VisibleStartIndex = igm.Position.SelectedPosition
 
 	options.FooterHelpItems = []gaba.FooterHelpItem{
+		{ButtonName: "B", HelpText: utils.GetString("back")},
 		{ButtonName: "A", HelpText: utils.GetString("select")},
 	}
 

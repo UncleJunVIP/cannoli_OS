@@ -3,32 +3,28 @@ package utils
 import (
 	"cannoliOS/models"
 	"cannoliOS/state"
-	"fmt"
+	"encoding/json"
 	"log/slog"
 	"os"
 
 	"github.com/UncleJunVIP/gabagool/pkg/gabagool"
 )
 
-func Init() {
-	var err error
-	config, err := LoadConfig("config.json")
-
+func LoadConfig() error {
+	data, err := os.ReadFile("config.json")
 	if err != nil {
-		GetLoggerInstance().Error("Failed to load config.json", "error", err)
-		os.Exit(1)
+		return err
+	}
+
+	var config models.Config
+	if err := json.Unmarshal(data, &config); err != nil {
+		return err
 	}
 
 	gabagool.SetLogLevel(config.LogLevel)
+	state.Init(&config)
 
-	if err := os.MkdirAll("logs", 0755); err != nil {
-		fmt.Printf("Failed to create logs directory: %v\n", err)
-		os.Exit(1)
-	}
-
-	state.Init(config)
-
-	GetLoggerInstance().Info("=== Cannoli OS Started ===")
+	return nil
 }
 
 func GetLoggerInstance() *slog.Logger {

@@ -25,10 +25,11 @@ Taking what I've learned from building Paks, I wanted to try building a no-frill
 # Design Goals
 
 - Minimal Configuration
+- Unambiguous Directory Structure
 - Easy to add new games
-- Easy to do basic things
+- Basic features baked in
 - Full access to RetroArch
-- Judicious addition of features
+- Judicious addition of additional features
 - All binaries of known provenance
 
 ---
@@ -64,6 +65,7 @@ Taking what I've learned from building Paks, I wanted to try building a no-frill
 - [ ] Compatability with the MinUI Pak Format for Tools
 
 - [ ] Settings
+    - [ ] Change Language
     - [ ] Platform Core Mapping
     - [ ] Wi-Fi
     - [ ] Services Menu

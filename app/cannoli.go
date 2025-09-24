@@ -5,6 +5,7 @@ import (
 	"cannoliOS/ui"
 	"cannoliOS/utils"
 	"fmt"
+	"os"
 	"time"
 
 	_ "github.com/UncleJunVIP/certifiable"
@@ -20,7 +21,15 @@ func init() {
 		LogFilename:    "cannoliOS.log",
 	})
 
-	utils.Init()
+	logger := utils.GetLoggerInstance()
+
+	err := utils.LoadConfig()
+	if err != nil {
+		logger.Error("Failed to load config", "error", err)
+		os.Exit(1)
+	}
+
+	logger.Info("=== Cannoli OS Started ===")
 }
 
 func exit() {
@@ -59,11 +68,6 @@ func main() {
 			case models.Select:
 				directory := sr.Output.(models.Directory)
 				logger.Debug(fmt.Sprintf("Selected directory: %s (path: %s)", directory.DisplayName, directory.Path))
-
-				if directory.DisplayName == "RetroArch" {
-					utils.LaunchRetroArchMenu()
-					continue
-				}
 
 				currentScreen = ui.GameList{
 					Directory:      directory,

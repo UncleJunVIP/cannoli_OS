@@ -14,6 +14,8 @@ github.com/craterdog/go-collection-framework/v7 v7.4.0 h1:sU+WAjw9WlSoGFCd3GgtVa
 github.com/craterdog/go-collection-framework/v7 v7.4.0/go.mod h1:SEAnvw+YEEGhchxDsO9MgOj8K7pycfBPM2t8dDdN/jo=
 github.com/craterdog/go-missing-utilities/v7 v7.13.0 h1:03R+Dm5zdBL/7ilGpXqBMop5QX1D6dQB3EYdpYLCk8Q=
 github.com/craterdog/go-missing-utilities/v7 v7.13.0/go.mod h1:uEyTYeiSq4hzoJn9dPPZxGUKVjKU90v0xh0WhTnhRVs=
+github.com/craterdog/go-missing-utilities/v7 v7.17.0 h1:MxbnXv2abPzf980iq/72aujJubOrJ6Qa4vlHfxzpz2E=
+github.com/craterdog/go-missing-utilities/v7 v7.17.0/go.mod h1:QIlxcEbals02cl4kp6qo4rQHtVEBv97XNYSZLA9NhgU=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/holoplot/go-evdev v0.0.0-20250804134636-ab1d56a1fe83 h1:B+A58zGFuDrvEZpPN+yS6swJA0nzqgZvDzgl/OPyefU=
